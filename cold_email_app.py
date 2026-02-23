@@ -1,114 +1,73 @@
 import streamlit as st
-import subprocess
+import google.generativeai as genai
+import os
 
-st.set_page_config(page_title="Cold Email Engine", page_icon="🚀", layout="wide")
+# ----------------------------
+# Configure Gemini API
+# ----------------------------
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-# ---------- CUSTOM DARK THEME CSS ----------
-st.markdown("""
-<style>
-body {
-    background-color: #0f0f0f;
-    color: white;
-}
+# ----------------------------
+# Streamlit UI
+# ----------------------------
+st.set_page_config(page_title="Cold Email Engine", page_icon="📧")
 
-.main {
-    background-color: #0f0f0f;
-}
-
-.stTextInput>div>div>input, 
-.stTextArea textarea {
-    background-color: #1c1c1c;
-    color: white;
-    border-radius: 8px;
-    border: 1px solid #333;
-}
-
-.stSelectbox div {
-    background-color: #1c1c1c;
-    color: white;
-}
-
-.stButton>button {
-    background: linear-gradient(90deg, #6a11cb, #2575fc);
-    color: white;
-    border-radius: 10px;
-    height: 3em;
-    width: 100%;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-}
-
-.stButton>button:hover {
-    background: linear-gradient(90deg, #2575fc, #6a11cb);
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ---------- HEADER ----------
-st.markdown("""
-<h1 style='text-align:center; color:white;'>
-🚀 B2B Cold Email Outreach Engine
-</h1>
-<p style='text-align:center; color:gray; font-size:18px;'>
-Generate high-converting personalized outreach sequences in seconds.
-</p>
-""", unsafe_allow_html=True)
+st.title("📧 AI Cold Email Sequence Generator")
+st.markdown("Generate high-converting cold email sequences using Gemini AI.")
 
 st.divider()
 
-# ---------- INPUT SECTION ----------
-col1, col2 = st.columns(2)
+# ----------------------------
+# Input Fields
+# ----------------------------
+prospect_name = st.text_input("Prospect Name")
+company_name = st.text_input("Company Name")
+industry = st.text_input("Industry")
+pain_point = st.text_area("Main Pain Point")
+your_offer = st.text_area("Your Offer")
 
-with col1:
-    prospect_name = st.text_input("👤 Prospect Name")
-    company_name = st.text_input("🏢 Company Name")
-    website = st.text_input("🌐 Company Website")
+generate_button = st.button("🚀 Generate Sequence")
 
-with col2:
-    your_service = st.text_area("💼 Your Service / Offer")
-    pain_point = st.text_area("⚡ Target Pain Point")
-    tone = st.selectbox("🎯 Tone", ["Professional", "Confident", "Friendly", "Direct"])
+# ----------------------------
+# Generate Email Sequence
+# ----------------------------
+if generate_button:
 
-st.divider()
-
-# ---------- GENERATE BUTTON ----------
-if st.button("🚀 Generate Outreach Sequence"):
-
-    if prospect_name and company_name and your_service:
+    if not prospect_name or not company_name or not pain_point or not your_offer:
+        st.warning("⚠ Please fill all required fields.")
+    else:
 
         prompt = f"""
-        You are a B2B cold email expert.
+You are an expert cold email copywriter.
 
-        Prospect Name: {prospect_name}
-        Company Name: {company_name}
-        Website: {website}
-        Service Offered: {your_service}
-        Pain Point: {pain_point}
-        Tone: {tone}
+Prospect Name: {prospect_name}
+Company: {company_name}
+Industry: {industry}
+Pain Point: {pain_point}
+Offer: {your_offer}
 
-        Generate:
+Generate:
 
-        1) 3 Subject Line options
-        2) Primary Cold Email (short, personalized)
-        3) Follow-up Email 1
-        4) Follow-up Email 2
-        5) Strong Call-to-Action
+1) 3 Subject Line options
+2) Primary Cold Email (short, personalized)
+3) Follow-up Email 1
+4) Follow-up Email 2
+5) Strong Call-to-Action
 
-        Keep it concise and high converting.
-        """
+Keep it concise, personalized and high-converting.
+"""
 
         with st.spinner("Generating sequence..."):
-            result = subprocess.run(
-                ["ollama", "run", "mistral", prompt],
-                capture_output=True,
-                text=True
-            )
 
-            st.success("✅ Sequence Generated")
+            try:
+                response = model.generate_content(prompt)
+                result_text = response.text
 
-            st.markdown("### 📩 Your Outreach Sequence")
-            st.markdown(result.stdout)
+                st.success("✅ Sequence Generated Successfully!")
+                st.markdown("### 📩 Your Outreach Sequence")
+                st.markdown(result_text)
 
-    else:
-        st.warning("⚠ Please fill required fields.")
+            except Exception as e:
+                st.error("❌ Something went wrong.")
+                st.exception(e)
