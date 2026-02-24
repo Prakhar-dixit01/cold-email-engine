@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
 st.set_page_config(page_title="Cold Email Engine", page_icon="📧")
 
@@ -7,16 +7,15 @@ st.title("📧 AI Cold Email Sequence Generator")
 st.markdown("Generate high-converting cold email sequences using Gemini AI.")
 st.divider()
 
-# Load API key from Streamlit Secrets
+# Load API key
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except Exception:
     st.error("🚨 GEMINI_API_KEY not found in Streamlit Secrets.")
     st.stop()
 
-genai.configure(api_key=api_key)
-
-model = genai.GenerativeModel("gemini-pro")
+# Initialize client
+client = genai.Client(api_key=api_key)
 
 # Inputs
 prospect_name = st.text_input("Prospect Name")
@@ -52,10 +51,15 @@ Keep it concise and high converting.
 
         with st.spinner("Generating..."):
             try:
-                response = model.generate_content(prompt)
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=prompt
+                )
+
                 st.success("✅ Sequence Generated!")
                 st.markdown("### 📩 Your Outreach Sequence")
                 st.write(response.text)
+
             except Exception as e:
                 st.error("❌ Error occurred")
                 st.exception(e)
