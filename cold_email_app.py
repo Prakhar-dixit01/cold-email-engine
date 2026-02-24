@@ -14,7 +14,11 @@ st.divider()
 # ----------------------------
 # API KEY CHECK
 # ----------------------------
-api_key = os.getenv("AIzaSyDlsY3iKBXa_mjMtptmZu6e9nbOOgLBQms")
+try:
+    api_key = st.secrets["AIzaSyDlsY3iKBXa_mjMtptmZu6e9nbOOgLBQms"]
+except Exception:
+    st.error("🚨 GEMINI_API_KEY not found in Streamlit Secrets.")
+    st.stop()
 
 if not api_key:
     st.error("🚨 GEMINI_API_KEY not found. Please set it in Streamlit Secrets.")
@@ -75,4 +79,5 @@ Keep it concise and high converting.
             except Exception as e:
                 st.error("❌ Something went wrong while generating content.")
                 st.exception(e)
+
 
