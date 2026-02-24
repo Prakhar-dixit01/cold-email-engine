@@ -3,18 +3,25 @@ import os
 from google import genai
 
 # ----------------------------
-# Configure Gemini API
-# ----------------------------
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-# ----------------------------
-# Streamlit UI
+# Streamlit Page Config
 # ----------------------------
 st.set_page_config(page_title="Cold Email Engine", page_icon="📧")
 
 st.title("📧 AI Cold Email Sequence Generator")
 st.markdown("Generate high-converting cold email sequences using Gemini AI.")
 st.divider()
+
+# ----------------------------
+# API KEY CHECK
+# ----------------------------
+api_key = os.getenv("AIzaSyCYrOQ-lsTzoj_Utf8Aox_TZiz61k-2zHo")
+
+if not api_key:
+    st.error("🚨 GEMINI_API_KEY not found. Please set it in Streamlit Secrets.")
+    st.stop()
+
+# Initialize Gemini Client
+client = genai.Client(api_key=api_key)
 
 # ----------------------------
 # Input Fields
@@ -57,7 +64,7 @@ Keep it concise and high converting.
 
             try:
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash-latest",
+                    model="gemini-1.0-pro",
                     contents=prompt
                 )
 
@@ -66,7 +73,5 @@ Keep it concise and high converting.
                 st.write(response.text)
 
             except Exception as e:
-                st.error("❌ Error occurred")
+                st.error("❌ Something went wrong while generating content.")
                 st.exception(e)
-
-
