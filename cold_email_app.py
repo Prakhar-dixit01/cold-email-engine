@@ -15,7 +15,7 @@ st.divider()
 # API KEY CHECK
 # ----------------------------
 try:
-    api_key = st.secrets["AIzaSyDlsY3iKBXa_mjMtptmZu6e9nbOOgLBQms"]
+    api_key = st.secrets["GEMINI_API_KEY"]
 except Exception:
     st.error("🚨 GEMINI_API_KEY not found in Streamlit Secrets.")
     st.stop()
