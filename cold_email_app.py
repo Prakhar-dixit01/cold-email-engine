@@ -1,44 +1,30 @@
 import streamlit as st
-import os
-from google import genai
+import google.generativeai as genai
 
-# ----------------------------
-# Streamlit Page Config
-# ----------------------------
 st.set_page_config(page_title="Cold Email Engine", page_icon="📧")
 
 st.title("📧 AI Cold Email Sequence Generator")
 st.markdown("Generate high-converting cold email sequences using Gemini AI.")
 st.divider()
 
-# ----------------------------
-# API KEY CHECK
-# ----------------------------
+# Load API key from Streamlit Secrets
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except Exception:
     st.error("🚨 GEMINI_API_KEY not found in Streamlit Secrets.")
     st.stop()
 
-if not api_key:
-    st.error("🚨 GEMINI_API_KEY not found. Please set it in Streamlit Secrets.")
-    st.stop()
+genai.configure(api_key=api_key)
 
-# Initialize Gemini Client
-client = genai.Client(api_key=api_key)
+model = genai.GenerativeModel("gemini-pro")
 
-# ----------------------------
-# Input Fields
-# ----------------------------
+# Inputs
 prospect_name = st.text_input("Prospect Name")
 company_name = st.text_input("Company Name")
 industry = st.text_input("Industry")
 pain_point = st.text_area("Main Pain Point")
 your_offer = st.text_area("Your Offer")
 
-# ----------------------------
-# Generate Button
-# ----------------------------
 if st.button("🚀 Generate Sequence"):
 
     if not prospect_name or not company_name or not pain_point or not your_offer:
@@ -55,29 +41,21 @@ Pain Point: {pain_point}
 Offer: {your_offer}
 
 Generate:
-1) 3 Subject Line options
+1) 3 Subject Lines
 2) Primary Cold Email
 3) Follow-up Email 1
 4) Follow-up Email 2
-5) Strong Call-to-Action
+5) Strong CTA
 
 Keep it concise and high converting.
 """
 
-        with st.spinner("Generating sequence..."):
-
+        with st.spinner("Generating..."):
             try:
-                response = client.models.generate_content(
-                    model="gemini-1.0-pro",
-                    contents=prompt
-                )
-
+                response = model.generate_content(prompt)
                 st.success("✅ Sequence Generated!")
                 st.markdown("### 📩 Your Outreach Sequence")
                 st.write(response.text)
-
             except Exception as e:
-                st.error("❌ Something went wrong while generating content.")
+                st.error("❌ Error occurred")
                 st.exception(e)
-
-
