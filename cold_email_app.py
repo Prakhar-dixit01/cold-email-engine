@@ -57,7 +57,7 @@ Keep it concise and high converting.
 
             try:
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-1.5-flash_latest",
                     contents=prompt
                 )
 
@@ -68,3 +68,4 @@ Keep it concise and high converting.
             except Exception as e:
                 st.error("❌ Error occurred")
                 st.exception(e)
+
